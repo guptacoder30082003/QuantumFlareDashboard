@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>QuantumFlare's Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;900&display=swap" rel="stylesheet">
+	  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Montserrat', sans-serif;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        padding-top: 80px; 
+      }
+      #navigation1 {
+        background-color: rgb(118, 181, 197);
+        text-align: left;
+        padding: 20px;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        margin-bottom: 10px;
+      }
+      #navigation1 a {
+        text-decoration: none;
+        margin-right: 5px;
+        color: white;
+        padding: 10px 20px;
+        transition: background-color 0.3s, color 0.3s, border-radius 0.3s;
+      }
+
+      #navigation1 a:hover, 
+      #navigation1 a.active {
+        background-color: white;
+        color: black;
+        border-radius: 0.25em;
+      }
+
+      .container {
+        text-align: center;
+        margin-bottom: 40px;
+        color: black;
+        margin-top: 5px;
+      }
+
+      h1 {
+        font-size: 2.8rem;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .subtitle {
+        font-size: 1.2rem;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .boxes-container {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 30px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .box {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        width: 320px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .box-title {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        color: #333;
+      }
+
+      .box-content {
+        color: #666;
+        line-height: 1.6;
+        text-align: center;
+      }
+      .box:hover{
+        transform: translateY(-5px);
+      }
+
+      @media (max-width: 768px) {
+        .boxes-container {
+          flex-direction: column;
+          align-items: center;
+        }
+        
+        .box {
+          width: 80%;
+          max-width: 320px;
+        }
+        
+        h1 {
+          font-size: 2.2rem;
+        }
+        
+        .subtitle {
+          font-size: 1rem;
+          padding: 0 15px;
+        }
+        
+        #navigation1 {
+          padding: 15px;
+        }
+        
+        #navigation1 a {
+          padding: 8px 16px;
+          font-size: 0.9rem;
+        }
+      }
+      @media (max-width: 480px) {
+        .box {
+          width: 85%;
+          padding: 20px;
+        }
+        
+        h1 {
+          font-size: 2rem;
+        }
+        
+        body {
+          padding-top: 70px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav id="navigation1">
+      <a href="">Home</a>
+      <a href="">About Us</a>
+    </nav>
+    <div class="container">
+      <h1>Hi there!</h1>
+      <p class="subtitle">Here is the full report of the microplastic in your water</p>
+      <p class="subtitle" id="test">Waiting for API</p>
+    </div>
+    <div class="boxes-container">
+      <div class="box">
+        <div class="box-icon" id="polymer-type"><h3>--</h3></div>
+          <h2 class="box-title">Type of Polymer</h2>
+          <p class="box-content">This is the polymer type of microplastic found in the majority of your water sample.</p>
+        </div>
+        <div class="box">
+          <div class="box-icon" id="quantity"><p>--</p></div>
+          <h2 class="box-title">Quantity of microplastic</h2>
+          <p class="box-content">This is the quantity of microplastic found in particles per liter. This is just approximate, not exact numbers.</p>
+        </div>
+        <div class="box">
+          <h2 class="box-title">Possible Sources</h2>
+          <ol id="sources"></ol>
+        </div>
+        <div class="box">
+          <div class="box-icon" id="area"><p>--</p></div>
+          <h2 class="box-title">Area of particle</h2>
+          <p class="box-content">Tells the number of pixels within the particle contour</p>
+        </div>
+        <div class="box">
+          <div class="box-icon" id="perimeter"><p>--</p></div>
+          <h2 class="box-title">Perimeter of particle</h2>
+          <p class="box-content">Tells the length of the particle boundary in pixels</p>
+        </div>
+        <div class="box">
+          <div class="box-icon" id="diameter"><p>--</p></div>
+          <h2 class="box-title" style="text-align: center;">Equivalent Diameter of particle</h2>
+          <p class="box-content">Tells the diameter of a circle that would have the same area as the particle</p>
+        </div>
+    </div>
+    <script>
+      const testElement = document.getElementById('test');
+      const polymerTypeElement = document.getElementById('polymer-type');
+      const quantityElement = document.getElementById('quantity');
+      const areaElement = document.getElementById('area');
+      const perimeterElement = document.getElementById('perimeter');
+      const diameterElement = document.getElementById('diameter');
+      const sourcesElement = document.getElementById('sources');
+      
+      const polymerTypes = {
+        0: "Polyethylene",
+        1: "Polypropylene", 
+        2: "Polystyrene"
+      };
+
+      function updatePolymerType(predicted_class) {
+        const polymerType = polymerTypes[predicted_class] || "--";
+        polymerTypeElement.innerHTML = `<h3>${polymerType}</h3>`;
+        updateSources(polymerType);
+      }
+
+      function updateSources(polymerType) {
+        let sources = [];
+
+        if (polymerType === "Polyethylene Terephthalate") {
+          sources = [
+            "Plastic bottles",
+            "Synthetic textiles (polyester clothes, carpets)",
+            "Food packaging",
+            "Beverage containers",
+            "Films"
+          ];
+        } 
+        if (polymerType === "Polypropylene") {
+          sources = [
+            "Food containers, bottle caps",
+            "Straws, disposable cutlery",
+            "Car parts (bumpers, dashboards).",
+            "Woven bags, ropes, fishing nets.",
+            "Nonwoven fabrics (masks, diapers, wipes)"
+          ];
+        } 
+        if (polymerType === "Polystyrene") {
+          sources = [
+            "Disposable cups and plates",
+            "Food trays",
+            "Packaging foams (Styrofoam)",
+            "Insulation materials",
+            "Single-use cutlery"
+          ];
+        } 
+
+        if (polymerType === "Polyvinyl Chloride") {
+          sources = [
+            "Pipes",
+            "Window Frames",
+            "Flooring, cables",
+            "Medical tubing",
+            "Packaging sheets"
+          ];
+        } 
+
+        if (polymerType === "Polyethylene") {
+          sources = [
+            "Plastic bags",
+            "Packaging films",
+            "Bottles",
+            "Household containers",
+            "Agricultural films",
+            "Cosmetic microbeads"
+          ];
+        }
+
+        if (sources.length > 0) {
+          sourcesElement.innerHTML = '';
+          const ol = document.createElement('ol');
+          sources.forEach(source => {
+            const li = document.createElement('li');
+            li.textContent = source;
+            ol.appendChild(li);
+          });
+          sourcesElement.appendChild(ol);
+        }
+      }
+
+      async function fetchAPIData() {
+        try {
+          const response = await fetch('https://quantumflareapi.onrender.com');
+          if (response.ok) {
+            const data = await response.json();
+            testElement.textContent = "Connection with API successful";
+            
+            if (data.combined_prediction) {
+              updatePolymerType(data.combined_prediction.predicted_class);
+            }
+            
+            if (data.microplastic_count) {
+              quantityElement.innerHTML = `<p>${data.microplastic_count}</p>`;
+            }
+            
+            if (data.particles && data.particles.length > 0) {
+              const particle = data.particles[0];
+              
+              if (particle.area) {
+                areaElement.innerHTML = `<p>${particle.area}</p>`;
+              }
+              
+              if (particle.perimeter) {
+                perimeterElement.innerHTML = `<p>${particle.perimeter}</p>`;
+              }
+              
+              if (particle.equivalent_diameter) {
+                diameterElement.innerHTML = `<p>${particle.equivalent_diameter}</p>`;
+              }
+            }
+          } else {
+            testElement.textContent = "Waiting for API";
+          }
+        } catch (error) {
+          testElement.textContent = "Waiting for API";
+        }
+      }
+
+      fetchAPIData();
+      setInterval(fetchAPIData, 5000);
+    </script>
+  </body>
+</html>
