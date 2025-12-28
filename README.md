@@ -11,21 +11,30 @@ This is a Flask API for places review app. It uses SQLite database. Follow these
 ## Step 1: Install Packages
 
 Open terminal in this folder. Run this command:
+
+```
 pip install -r requirements.txt
+```
 
 This installs Flask, Flask-SQLAlchemy, and SQLAlchemy.
 
 ## Step 2: Add Sample Data
 
 Run the data population script first:
+
+```
 python data_population_script.py
+```
 
 This creates 50 users, 100 places, and many reviews. It shows sample login phones at end.
 
 ## Step 3: Start the App
 
 Run the main app:
+
+```
 python app.py
+```
 
 App runs on `http://127.0.0.1:5000`. Keep terminal open.
 
